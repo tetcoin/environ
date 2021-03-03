@@ -1,6 +1,5 @@
 
-= Environ 
-A Tetsy form of Environmental to set scope-limited values can can be accessed statically
+= Environ - A Tetsy form of Environmental to set scope-limited values can can be accessed statically
 
 .Summary
 [source, toml]
