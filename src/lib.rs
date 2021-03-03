@@ -14,16 +14,16 @@
 
 //! Safe global references to stack variables.
 //!
-//! Set up a global reference with environmental! macro giving it a name and type.
+//! Set up a global reference with environ! macro giving it a name and type.
 //! Use the `using` function scoped under its name to name a reference and call a function that
 //! takes no parameters yet can access said reference through the similarly placed `with` function.
 //!
 //! # Examples
 //!
 //! ```
-//! #[macro_use] extern crate environmental;
+//! #[macro_use] extern crate environ;
 //! // create a place for the global reference to exist.
-//! environmental!(counter: u32);
+//! environ!(counter: u32);
 //! fn stuff() {
 //!   // do some stuff, accessing the named reference as desired.
 //!   counter::with(|i| *i += 1);
@@ -164,8 +164,8 @@ pub fn with<T: ?Sized, R, F: FnOnce(&mut T) -> R>(
 /// Initializing the global context with a given value.
 ///
 /// ```rust
-/// #[macro_use] extern crate environmental;
-/// environmental!(counter: u32);
+/// #[macro_use] extern crate environ;
+/// environ!(counter: u32);
 /// fn main() {
 ///   let mut counter_value = 41u32;
 ///   counter::using(&mut counter_value, || {
@@ -185,7 +185,7 @@ pub fn with<T: ?Sized, R, F: FnOnce(&mut T) -> R>(
 /// Roughly the same, but with a trait object:
 ///
 /// ```rust
-/// #[macro_use] extern crate environmental;
+/// #[macro_use] extern crate environ;
 ///
 /// trait Increment { fn increment(&mut self); }
 ///
@@ -193,7 +193,7 @@ pub fn with<T: ?Sized, R, F: FnOnce(&mut T) -> R>(
 ///	fn increment(&mut self) { *self += 1 }
 /// }
 ///
-/// environmental!(val: Increment + 'static);
+/// environ!(val: Increment + 'static);
 ///
 /// fn main() {
 ///	let mut local = 0i32;
@@ -205,7 +205,7 @@ pub fn with<T: ?Sized, R, F: FnOnce(&mut T) -> R>(
 /// }
 /// ```
 #[macro_export]
-macro_rules! environmental {
+macro_rules! environ {
 	($name:ident : $t:ty) => {
 		#[allow(non_camel_case_types)]
 		struct $name { __private_field: () }
@@ -288,11 +288,11 @@ macro_rules! environmental {
 			}
 		}
 	};
-	($name:ident : trait $t:ident <>) => { $crate::environmental! { $name : trait @$t [] } };
+	($name:ident : trait $t:ident <>) => { $crate::environ! { $name : trait @$t [] } };
 	($name:ident : trait $t:ident < $($args:ty),* $(,)* >) => {
-		$crate::environmental! { $name : trait @$t [$($args,)*] }
+		$crate::environ! { $name : trait @$t [$($args,)*] }
 	};
-	($name:ident : trait $t:ident) => { $crate::environmental! { $name : trait @$t [] } };
+	($name:ident : trait $t:ident) => { $crate::environ! { $name : trait @$t [] } };
 }
 
 #[cfg(test)]
@@ -302,18 +302,18 @@ mod tests {
 	mod trait_test {
 		trait Test {}
 
-		environmental!(item_positon_trait: trait Test);
+		environ!(item_positon_trait: trait Test);
 	}
 
 	// Test type in item position
 	#[allow(dead_code)]
 	mod type_test {
-		environmental!(item_position_type: u32);
+		environ!(item_position_type: u32);
 	}
 
 	#[test]
 	fn simple_works() {
-		environmental!(counter: u32);
+		environ!(counter: u32);
 
 		fn stuff() { counter::with(|value| *value += 1); };
 
@@ -329,7 +329,7 @@ mod tests {
 
 	#[test]
 	fn overwrite_with_lesser_lifetime() {
-		environmental!(items: Vec<u8>);
+		environ!(items: Vec<u8>);
 
 		let mut local_items = vec![1, 2, 3];
 		items::using(&mut local_items, || {
@@ -352,7 +352,7 @@ mod tests {
 			fn set(&mut self, x: i32) { *self = x }
 		}
 
-		environmental!(foo: dyn Foo + 'static);
+		environ!(foo: dyn Foo + 'static);
 
 		fn stuff() {
 			foo::with(|value| {
@@ -375,7 +375,7 @@ mod tests {
 	fn unwind_recursive() {
 		use std::panic;
 
-		environmental!(items: Vec<u8>);
+		environ!(items: Vec<u8>);
 
 		let panicked = panic::catch_unwind(|| {
 			let mut local_outer = vec![1, 2, 3];
@@ -405,7 +405,7 @@ mod tests {
 			}
 		}
 
-		environmental!(sum: trait Sum);
+		environ!(sum: trait Sum);
 		let numbers = vec![1, 2, 3, 4, 5];
 		let mut numbers = &numbers[..];
 		let got_sum = sum::using(&mut numbers, || {
@@ -424,7 +424,7 @@ mod tests {
 			}
 		}
 
-		environmental!(sum: trait Sum);
+		environ!(sum: trait Sum);
 		let numbers = vec![1, 2, 3, 4, 5];
 		let mut numbers = &numbers[..];
 		let got_sum = sum::using(&mut numbers, || {
@@ -463,6 +463,6 @@ mod tests {
 		}).unwrap();
 
 		assert_eq!(out, 6 + 42);
-		environmental!(foo<Plus>: trait Multiplier<ConcretePlus>);
+		environ!(foo<Plus>: trait Multiplier<ConcretePlus>);
 	}
 }
