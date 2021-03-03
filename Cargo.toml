@@ -1,10 +1,13 @@
 [package]
-name = "environmental"
+name = "environ"
 description = "Set scope-limited values can can be accessed statically"
 version = "1.1.2"
 authors = ["Parity Technologies <admin@parity.io>"]
 license = "Apache-2.0"
 edition = "2018"
+homepage = "https://github.com/tetcoin/environ"
+repository = "https://github.com/tetcoin/environ"
+documentation = "https://docs.rs/environ"
 
 [features]
 default = ["std"]
